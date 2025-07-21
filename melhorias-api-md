@@ -1,0 +1,25 @@
+# Melhorias sugeridas para a Helpdesk API
+
+1. ✅ **Validação de campos com Joi ou Zod**
+   - Garante mensagens de erro padronizadas e documentação automática.
+
+2. ✅ **Versionamento da API**
+   - `/v1/usuarios` → futuro upgrade sem quebrar apps que usam a versão anterior.
+
+3. ✅ **Autenticação JWT com roles**
+   - Permitir níveis de acesso (admin, técnico, cliente).
+
+4. ✅ **Swagger/OpenAPI**
+   - Documentação interativa para consumidores da API.
+
+5. ✅ **Paginação nos endpoints de listagem**
+   - Evita sobrecarga em grandes volumes de dados.
+
+6. ✅ **Logs estruturados**
+   - Útil para monitoramento e debugging (usando Winston ou pino.js)
+
+7. ✅ **Testes unitários no backend**
+   - Separados dos testes de API, para cobrir a lógica interna.
+
+8. ✅ **Rate limiting**
+   - Segurança contra ataques de força bruta em endpoints como login.
