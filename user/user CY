@@ -1,0 +1,35 @@
+describe('Usuários - Testes API Helpdesk', () => {
+  const user = {
+    nome: 'Ana Teste',
+    email: 'ana@teste.com',
+    senha: '123456'
+  };
+
+  beforeEach(() => {
+    cy.request('GET', '/usuarios').then((res) => {
+      const existente = res.body.find(u => u.email === user.email);
+      if (existente) {
+        cy.request('DELETE', `/usuarios/${existente.id}`);
+      }
+    });
+  });
+
+  it('Deve criar usuário com sucesso', () => {
+    cy.request('POST', '/usuarios', user).then((res) => {
+      expect(res.status).to.eq(201);
+      expect(res.body).to.have.property('id');
+    });
+  });
+
+  it('Não deve permitir e-mail duplicado', () => {
+    cy.request('POST', '/usuarios', user);
+    cy.request({
+      method: 'POST',
+      url: '/usuarios',
+      body: user,
+      failOnStatusCode: false
+    }).then((res) => {
+      expect(res.status).to.eq(400);
+    });
+  });
+});
