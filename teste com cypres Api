@@ -1,0 +1,21 @@
+describe('Helpdesk API', () => {
+  it('deve criar um usuário', () => {
+    cy.request('POST', '/api/usuarios', {
+      nome: 'João',
+      email: 'joao@example.com'
+    }).then((response) => {
+      expect(response.status).to.eq(201);
+      expect(response.body).to.have.property('id');
+    });
+  });
+
+  it('deve criar um chamado para um usuário', () => {
+    cy.request('POST', '/api/chamados', {
+      usuarioId: 1,
+      descricao: 'Problema com o login'
+    }).then((response) => {
+      expect(response.status).to.eq(201);
+      expect(response.body).to.have.property('id');
+    });
+  });
+});
