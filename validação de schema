@@ -1,0 +1,15 @@
+const userSchema = {
+  type: 'object',
+  required: ['id', 'nome', 'email'],
+  properties: {
+    id: { type: 'number' },
+    nome: { type: 'string' },
+    email: { type: 'string' }
+  }
+};
+
+it('Valida schema de usuário', () => {
+  cy.request('GET', '/usuarios').then(res => {
+    expect(res.body[0]).to.be.jsonSchema(userSchema);
+  });
+});
