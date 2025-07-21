@@ -1,0 +1,77 @@
+describe('Usuários - Testes da API', () => {
+  const usuario = {
+    nome: 'Maria Teste',
+    email: 'maria@teste.com',
+    senha: 'senha123'
+  };
+
+  beforeEach(() => {
+    // Remover usuário se existir
+    cy.request('GET', '/usuarios').then(res => {
+      const existente = res.body.find(u => u.email === usuario.email);
+      if (existente) {
+        cy.request('DELETE', `/usuarios/${existente.id}`);
+      }
+    });
+  });
+
+  it('Cria usuário com sucesso (201)', () => {
+    cy.request('POST', '/usuarios', usuario).then(res => {
+      expect(res.status).to.eq(201);
+      expect(res.body).to.have.property('id');
+    });
+  });
+
+  it('Impede duplicação de e-mail (400)', () => {
+    cy.request('POST', '/usuarios', usuario);
+    cy.request({
+      method: 'POST',
+      url: '/usuarios',
+      body: usuario,
+      failOnStatusCode: false
+    }).then(res => {
+      expect(res.status).to.eq(400);
+      expect(res.body.message).to.include('já existe');
+    });
+  });
+
+  it('Valida campos obrigatórios (400)', () => {
+    cy.request({
+      method: 'POST',
+      url: '/usuarios',
+      body: {},
+      failOnStatusCode: false
+    }).then(res => {
+      expect(res.status).to.eq(400);
+      expect(res.body).to.have.property('errors');
+    });
+  });
+
+  it('Busca usuários (200)', () => {
+    cy.request('GET', '/usuarios').then(res => {
+      expect(res.status).to.eq(200);
+      expect(res.body).to.be.an('array');
+    });
+  });
+
+  it('Atualiza usuário com sucesso (200)', () => {
+    cy.request('POST', '/usuarios', usuario).then(res => {
+      const id = res.body.id;
+      cy.request('PUT', `/usuarios/${id}`, {
+        nome: 'Maria Atualizada'
+      }).then(updateRes => {
+        expect(updateRes.status).to.eq(200);
+        expect(updateRes.body.nome).to.eq('Maria Atualizada');
+      });
+    });
+  });
+
+  it('Exclui usuário (204)', () => {
+    cy.request('POST', '/usuarios', usuario).then(res => {
+      const id = res.body.id;
+      cy.request('DELETE', `/usuarios/${id}`).then(deleteRes => {
+        expect(deleteRes.status).to.eq(204);
+      });
+    });
+  });
+});
