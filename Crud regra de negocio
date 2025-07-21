@@ -1,0 +1,86 @@
+describe('Tickets - Testes da API', () => {
+  let userId = null;
+
+  before(() => {
+    // Criar usuário para vincular aos tickets
+    const user = {
+      nome: 'Carlos Suporte',
+      email: 'carlos@helpdesk.com',
+      senha: '123456'
+    };
+
+    cy.request('POST', '/usuarios', user).then(res => {
+      userId = res.body.id;
+    });
+  });
+
+  it('Cria ticket com sucesso (201)', () => {
+    const ticket = {
+      titulo: 'Erro 500',
+      descricao: 'Página cai ao salvar',
+      prioridade: 'alta',
+      usuarioId: userId
+    };
+
+    cy.request('POST', '/tickets', ticket).then(res => {
+      expect(res.status).to.eq(201);
+      expect(res.body).to.have.property('id');
+    });
+  });
+
+  it('Valida campos obrigatórios no ticket (400)', () => {
+    cy.request({
+      method: 'POST',
+      url: '/tickets',
+      body: {},
+      failOnStatusCode: false
+    }).then(res => {
+      expect(res.status).to.eq(400);
+      expect(res.body).to.have.property('errors');
+    });
+  });
+
+  it('Busca tickets (200)', () => {
+    cy.request('GET', '/tickets').then(res => {
+      expect(res.status).to.eq(200);
+      expect(res.body).to.be.an('array');
+    });
+  });
+
+  it('Atualiza ticket (200)', () => {
+    const ticket = {
+      titulo: 'Erro na tela',
+      descricao: 'Problema ao clicar no botão',
+      prioridade: 'média',
+      usuarioId: userId
+    };
+
+    cy.request('POST', '/tickets', ticket).then(res => {
+      const id = res.body.id;
+
+      cy.request('PUT', `/tickets/${id}`, {
+        status: 'resolvido'
+      }).then(update => {
+        expect(update.status).to.eq(200);
+        expect(update.body.status).to.eq('resolvido');
+      });
+    });
+  });
+
+  it('Exclui ticket (204)', () => {
+    const ticket = {
+      titulo: 'Teste de exclusão',
+      descricao: 'Verificando DELETE',
+      prioridade: 'baixa',
+      usuarioId: userId
+    };
+
+    cy.request('POST', '/tickets', ticket).then(res => {
+      const id = res.body.id;
+
+      cy.request('DELETE', `/tickets/${id}`).then(deleteRes => {
+        expect(deleteRes.status).to.eq(204);
+      });
+    });
+  });
+});
